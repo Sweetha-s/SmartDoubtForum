@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #eee;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    li:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Smart Classroom 🎓</h2>
+
+<div class="box">
+
+  <input type="text" id="question" placeholder="Ask a question">
+  <button id="postBtn">Post</button>
+
+  <h3>Questions (Click to Answer)</h3>
+  <ul id="questionList"></ul>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } 
+from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDxB4eQyeSRoUw-NQpRz9pyGxBTPs1k2X4",
+  authDomain: "smartdoubtforum.firebaseapp.com",
+  projectId: "smartdoubtforum"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ➕ ADD QUESTION
+document.getElementById("postBtn").addEventListener("click", async () => {
+
+  const q = document.getElementById("question").value;
+
+  if(q === ""){
+    alert("Enter question");
+    return;
+  }
+
+  await addDoc(collection(db, "Questions"), {
+    text: q
+  });
+
+  alert("Question Added ✅");
+
+  document.getElementById("question").value = "";
+
+  loadQuestions();
+
+});
+
+// 📥 LOAD QUESTIONS
+async function loadQuestions() {
+
+  const snapshot = await getDocs(collection(db, "Questions"));
+
+  const list = document.getElementById("questionList");
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+
+    const li = document.createElement("li");
+    li.innerText = doc.data().text;
+
+    // 🔥 CLICK → GO TO ANSWER PAGE
+    li.onclick = () => {
+      window.location.href = "answer.html?id=" + doc.id;
+    };
+
+    list.appendChild(li);
+
+  });
+
+}
+
+// load on start
+loadQuestions();
+
+</script>
+
+</body>
+</html>

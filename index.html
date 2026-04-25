@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Classroom</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 45%;
+      padding: 10px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .login {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .register {
+      background: #2196F3;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Smart Classroom</h2>
+
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+
+  <br>
+  <button class="login" id="loginBtn">Login</button>
+  <button class="register" id="registerBtn">Register</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDxB4eQyeSRoUw-NQpRz9pyGxBTPs1k2X4",
+  authDomain: "smartdoubtforum.firebaseapp.com",
+  projectId: "smartdoubtforum",
+  storageBucket: "smartdoubtforum.firebasestorage.app",
+  messagingSenderId: "692220964379",
+  appId: "1:692220964379:web:a761d3e9393efb593452be"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// 🔐 LOGIN
+document.getElementById("loginBtn").addEventListener("click", () => {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Login Successful ✅");
+      window.location.href = "home.html"; // redirect
+    })
+    .catch(err => {
+      alert(err.message);
+    });
+
+});
+
+// 🆕 REGISTER
+document.getElementById("registerBtn").addEventListener("click", () => {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Registered Successfully ✅");
+    })
+    .catch(err => {
+      alert(err.message);
+    });
+
+});
+
+</script>
+
+</body>
+</html>

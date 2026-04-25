@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Answers</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+
+    .box {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    button {
+      padding: 10px;
+      margin: 5px 0;
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    li {
+      background: #eee;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .back {
+      background: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <button class="back" onclick="goBack()">⬅ Back</button>
+
+  <h2>Answers 💬</h2>
+
+  <input type="text" id="answer" placeholder="Write answer">
+  <button id="addAnswer">Submit</button>
+
+  <ul id="answerList"></ul>
+
+</div>
+
+<script type="module">
+
+// 🔥 IMPORTS
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where } 
+from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging.js";
+
+// 🔥 CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDxB4eQyeSRoUw-NQpRz9pyGxBTPs1k2X4",
+  authDomain: "smartdoubtforum.firebaseapp.com",
+  projectId: "smartdoubtforum",
+  messagingSenderId: "692220964379",
+  appId: "1:692220964379:web:a761d3e9393efb593452be"
+};
+
+// 🔥 INIT
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔙 BACK
+window.goBack = function() {
+  window.location.href = "home.html";
+};
+
+// 👉 GET QUESTION ID
+const params = new URLSearchParams(window.location.search);
+const qid = params.get("id");
+
+// 🔔 REGISTER SERVICE WORKER (IMPORTANT)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('firebase-messaging-sw.js')
+    .then(() => console.log("Service Worker Registered"))
+    .catch(err => console.log("SW Error:", err));
+}
+
+// 🔔 SAFE FCM SETUP (NO CRASH)
+async function setupFCM() {
+  try {
+    const messaging = getMessaging(app);
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "BOrVib6dj6TZPb9NZ3BCCG7eTODfx5SK9THOFSrxGw7AKr3q6KSK5qqTJ_2LjTTbNhoh-2DsKTNZxktIbqmm6G8"
+      });
+alert("FCM running...");
+      alert("FCM Token: " + token);
+
+document.body.innerHTML += "<h3>FCM Token:</h3><p>" + token + "</p>";
+    }
+
+  } catch (err) {
+    console.log("FCM skipped (no issue):", err);
+  }
+}
+
+setupFCM();
+
+// ➕ ADD ANSWER (MAIN FUNCTION)
+document.getElementById("addAnswer").addEventListener("click", async () => {
+
+  const text = document.getElementById("answer").value;
+
+  if(text === ""){
+    alert("Enter answer");
+    return;
+  }
+
+  try {
+
+    await addDoc(collection(db, "Answers"), {
+      questionId: qid,
+      text: text
+    });
+
+    alert("Answer Added ✅");
+    alert("someone has answerd to your question ✅");
+
+    document.getElementById("answer").value = "";
+
+    loadAnswers();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error adding answer");
+  }
+
+});
+
+// 📥 LOAD ANSWERS
+async function loadAnswers() {
+
+  const q = query(collection(db, "Answers"), where("questionId", "==", qid));
+
+  const snapshot = await getDocs(q);
+
+  const list = document.getElementById("answerList");
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const li = document.createElement("li");
+    li.innerText = doc.data().text;
+    list.appendChild(li);
+  });
+
+}
+
+// load
+loadAnswers();
+
+</script>
+
+</body>
+</html>
